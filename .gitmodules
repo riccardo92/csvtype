@@ -1,0 +1,6 @@
+[submodule "vendor/csv-parser"]
+	path = vendor/csv-parser
+	url = https://github.com/AriaFallah/csv-parser.git
+[submodule "vendor/pybind11"]
+	path = vendor/pybind11
+	url = https://github.com/pybind/pybind11.git

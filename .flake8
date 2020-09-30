@@ -1,0 +1,4 @@
+[flake8]
+exclude = __pycache__,venv,docs,vendor
+max-line-length = 120
+max-doc-length = 120

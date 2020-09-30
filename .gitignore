@@ -1,0 +1,12 @@
+venv/
+*__pycache__
+*.DS_Store
+docs/build
+*.ctypes
+.pytest_cache
+*.egg-info
+.eggs
+var
+build
+*.so
+wheelhouse/

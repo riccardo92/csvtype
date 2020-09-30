@@ -1,0 +1,89 @@
+env:
+  global:
+    - TWINE_USERNAME=__token__
+
+notifications:
+  email: false
+
+matrix:
+  include:
+    - os: linux
+      dist: bionic
+      sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+           PLAT=manylinux1_x86_64
+    - os: linux
+      dist: bionic
+      sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=quay.io/pypa/manylinux1_i686
+           PRE_CMD=linux32
+           PLAT=manylinux1_i686
+    - os: linux
+      dist: bionic
+      sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=quay.io/pypa/manylinux2010_x86_64
+           PLAT=manylinux2010_x86_64
+    - os: osx
+      osx_image: xcode10
+      language: generic
+      env: PYTHON=36
+    - os: osx
+      osx_image: xcode10
+      language: generic
+      env: PYTHON=37
+    - os: osx
+      osx_image: xcode10
+      language: generic
+      env: PYTHON=38
+
+before_install:
+- |
+  if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+  sudo apt update
+  sudo apt install -y python3-pip
+  docker pull $DOCKER_IMAGE
+  fi
+
+- |
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  brew install swig;
+  curl -LO https://raw.githubusercontent.com/GiovanniBussi/macports-ci/master/macports-ci;
+  source ./macports-ci install;
+  fi
+
+- |
+  if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+  yes | sudo port install python$PYTHON;
+  yes | sudo port install py$PYTHON-pip;
+  sudo port select --set python3 python$PYTHON;
+  sudo port select --set pip pip$PYTHON;
+  pip install pyinstaller --user;
+  export PATH=$PATH:$(python3 -c "import site; print(site.USER_BASE)")/bin;
+  pip install wheel
+  fi
+
+script:
+- |
+  if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+  docker run --rm -e PLAT=$PLAT -v `pwd`:/io $DOCKER_IMAGE $PRE_CMD /io/travis/build-wheels.sh
+  ls wheelhouse/
+  fi
+- |
+  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+  mkdir -p wheelhouse
+  python3 setup.py bdist_wheel -d wheelhouse
+  fi
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: python3 -m pip install twine && python3 -m twine upload --verbose --skip-existing wheelhouse/*
+  on:
+    branch: master
+    tag: true
