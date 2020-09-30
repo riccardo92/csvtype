@@ -6,7 +6,7 @@ line by line so that memory usage is very limited while still being fast enough.
 
 The column types can be defined using PCRE regex patterns.
 
-You can find the documentation at: 
+You can find the documentation at: https://csvtype.readthedocs.io/en/latest/
 
 ## Installation
 
